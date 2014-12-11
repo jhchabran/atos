@@ -1,8 +1,8 @@
 class ExceptionHandler < StandardError
-  
+
   # Minimum required parameters
   def self.validate_request_params(datas)
-  
+
     required_params = [
       'merchant_id',
       'amount',
@@ -11,30 +11,30 @@ class ExceptionHandler < StandardError
       'normal_return_url',
       'automatic_response_url'
     ]
-    
-    required_params.each do |r| 
+
+    required_params.each do |r|
       raise "SIPS/Atos error : missing parameter '#{r}' in request" if !datas[r.to_sym]
     end
-   
+
   end
-  
+
   # Check if the request is ok
   def self.validate_binary_output(datas)
-    
+
     response = datas.split("!")
-    
+
     case response[1]
     when nil
       # No response at all from API
       raise "SIPS/Atos error : binary file does not respond ! Check your 'request' binary path, default is 'Rails.root/lib/atos/bin'"
-    when "0"      
+    when "0"
       # API responds 'ok', return the content
-      return response[3]
+      return response
     else
       # API binary responds an error, formated in a HTML table. Let's strip tags before showing the error message
-      raise "SIPS/Atos API binary file outputs : #{response[2].gsub(/<\/?[^>]*>/, '')}" 
+      raise "SIPS/Atos API binary file outputs : #{response[2].gsub(/<\/?[^>]*>/, '')}"
     end
-    
-  end   
-  
+
+  end
+
 end

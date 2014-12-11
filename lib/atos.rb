@@ -3,26 +3,26 @@ require 'exception_handler'
 class Atos
 
   attr_accessor :root_path, :request_path, :response_path, :pathfile_path
-  
+
   def initialize(*args)
-  
+
     args.empty? ? paths = {} : paths = args.first
-    
-    # You may override those default paths on Class instanciation 
+
+    # You may override those default paths on Class instanciation
     @root_path      = paths[:root_path] || "#{Rails.root}/lib/atos"
     @request_path   = paths[:request_path] || "#{@root_path}/bin/request"
     @response_path  = paths[:response_path] || "#{@root_path}/bin/response"
     @pathfile_path  = paths[:pathfile_path] || "#{@root_path}/param/pathfile"
-    
+
   end
-      
+
   # Call the request binary using request params
   def request(datas)
-    
-    ExceptionHandler.validate_request_params(datas)
-    args = build_args(datas)     
 
-    ExceptionHandler.validate_binary_output(`#{@request_path} #{args}`)    
+    ExceptionHandler.validate_request_params(datas)
+    args = build_args(datas)
+
+    ExceptionHandler.validate_binary_output(`#{@request_path} #{args}`)[3]
   end
 
   # Call the response binary using bank response
@@ -30,7 +30,7 @@ class Atos
 
     response = ExceptionHandler.validate_binary_output(`#{@response_path} pathfile=#{@pathfile_path} message=#{datas}`)
 
-    { 
+    {
       :code                   => response[1],
       :error                  => response[2],
       :merchant_id            => response[3],
@@ -63,9 +63,9 @@ class Atos
       :capture_day            => response[30],
       :capture_mode           => response[31],
       :data                   => response[32]
-    }      
-    
-  end    
+    }
+
+  end
 
 private
   def build_args(datas)
@@ -74,11 +74,11 @@ private
     datas[:language]         ||= "fr"                # => French locale
     datas[:currency_code]    ||= "978"               # => Euro
     datas[:pathfile]         ||= "#{@pathfile_path}" # => Path to the Atos "pathfile"
-         
+
     args = ''
     datas.each do |key, value|
       args << "'#{key.to_s}=#{value}' "
-    end  
+    end
 
     return args.rstrip
   end
